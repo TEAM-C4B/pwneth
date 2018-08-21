@@ -1,14 +1,22 @@
-# Solper v.0 - Solidity Exploit Helper
-SOLidity exploit helPER(SOLPER) v.0
+# PwnETH v.0.1 - Solidity Exploit Helper
+PwnETH => solidity exploit helper v.0.1
 
-## What is Solper
-Solper is a convenient library for analyzing and exploiting solidity contracts on Ethereum.
+## What is PwnETH
+PwnETH is a convenient library for analyzing and exploiting solidity contracts on Ethereum.
 
 ## How to Use
+```javascript
+var pwneth = require('./pwneth')
+```
 
+If you want to use in all directory, you just have to export environment PATH.
+
+```
+export NODE_PATH=/where/the/pwneth.js/
+```
 
 ## Contribution
-Team Code4Block: rictr0y, yeonnic, han3l
+Team Code4Block: yeonnic, rictr0y, han3l
 
 ## Contact
 If you have any questions not worthy of a bug report, feel free to mail us at team.code4block@gmail.com and ask away.
