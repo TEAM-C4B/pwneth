@@ -4,6 +4,10 @@ PwnETH => solidity exploit helper v.0.1
 ## What is PwnETH
 PwnETH is a convenient library for analyzing and exploiting solidity contracts on Ethereum.
 
+PwnETH makes your ETH exploit concise. It is easy to understand.
+
+Plus, Synchronization of asynchronous functions in javascript is included in PwnETH.
+
 ## How to Use
 ```javascript
 var pwneth = require('./pwneth')
