@@ -82,7 +82,7 @@ module.exports = {
 
   toWei(val, type) {
     return this.web3.utils.toWei(val, type);
-  }
+  },
 
   fromWei(val, type) {
     return this.web3.utils.fromWei(val, type);
