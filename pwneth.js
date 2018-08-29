@@ -1,58 +1,102 @@
 module.exports = {
-  web3(url){
-      var Web3 = require('web3');
-      var res = new Web3(new Web3.providers.HttpProvider(url));
-      return res
-    },
-  getStorage(web3, addr, idx){
-      var ret_val;
-      web3.eth.getStorageAt(addr, idx).then(e=>{ret_val=e;});
-      require('deasync').loopWhile(function(){return ret_val == undefined});
-  
-      return ret_val;
-    },
-  listStorage(web3, addr, len){
-      for(var i=0; i<len; i++){
-            /*
-             *       var done = false;
-             *       web3.eth.getStorageAt(addr, idx).then(e=>{console.log(e); done=true;});
-             *       require('deasync').loopWhile(function(){return !done});
-             */
-            console.log(this.getStorage(web3, addr, i));
-          }
-    },
+  web3 : undefined,
+  Accounts : undefined,
+  walletAddr : undefined,
 
-  contract(web3, addr, abi){
-      var res = new web3.eth.Contract(abi, addr);
-      return res;
-    },
+  setWeb3(url) {
+    var Web3 = require('web3');
+    var res = new Web3(new Web3.providers.HttpProvider(url));
+    
+    this.web3 = res
+    
+    return res
+  },
 
-  getAccounts(web3){
-      var res;
-      web3.eth.getAccounts().then(e=>{res=e;});
-      require('deasync').loopWhile(function(){return res == undefined});
-      return res
-    },
+  getStorage(addr, idx) {
+    var res;
+    this.web3.eth.getStorageAt(addr, idx).then(e=>{res = e;});
+    require('deasync').loopWhile(function() {return res == undefined});
 
-  addWallet(web3, pubkey){
-      web3.eth.accounts.wallet.add(pubkey);
-      return web3.eth.accounts.wallet[0].address;
-    },
+    return res;
+  },
 
-  intPack(number){
-      var str = number.toString(16);
-  
-      for(;str.length<64;){
-            str += '0' + str
-          }
-      return '0x' + str
-    },
-
-  bytesPack(web3, bytes){
-      var res = web3.utils.fromAscii(bytes)
-      for(;res.length<66;){
-            res += '0'
-          }
-      return res
+  listStorage(addr, len) {
+    for(var i=0; i<len; i++) {
+      console.log(this.getStorage(addr, i));
     }
+  },
+
+  getLastBlock() {
+    var lastBlockNumber;
+    this.web3.eth.getBlockNumber().then(e=>{lastBlockNumber = e});
+    require('deasync').loopWhile(function() {return lastBlockNumber == undefined});
+
+    var blockInfo;
+    this.web3.eth.getBlock(lastBlockNumber).then(e=>{blockInfo = e});
+    require('deasync').loopWhile(function() {return blockInfo == undefined})
+
+    return blockInfo
+  },
+
+  contract(abi, addr) {
+    var res = new this.web3.eth.Contract(abi, addr);
+    
+    return res;
+  },
+
+  getAccounts() {
+    var res;
+
+    this.web3.eth.getAccounts().then(e=>{res = e;});
+    require('deasync').loopWhile(function() {return res == undefined});
+    this.Accounts = res;
+
+    return res
+  },
+
+  addWallet(pubkey) {
+    this.web3.eth.accounts.wallet.add(pubkey);
+
+    this.walletAddr = this.web3.eth.accounts.wallet[0].address;
+    return this.walletAddr;
+  },
+
+  intPack(number) {
+    var str = number.toString(16).replace("0x", "");
+
+    for(; str.length < 64;) {
+      str += '0' + str
+    }
+
+    return '0x' + str
+  },
+
+  bytesPack(bytes) {
+    var res = this.web3.utils.fromAscii(bytes).replace("0x", "")
+    for(; res.length < 66;) {
+      res += '0'
+    }
+
+    return res
+  },
+
+  toWei(val, type) {
+    return this.web3.utils.toWei(val, type);
+  }
+
+  fromWei(val, type) {
+    return this.web3.utils.fromWei(val, type);
+  },
+
+  sendTransaction(from, to, value) {
+    var gas;
+    var res;
+    this.web3.eth.estimateGas({from:from, to:to, value:value}).then(e=>{gas = e});
+    require('deasync').loopWhile(function() {return gas == undefined});
+
+    this.web3.eth.sendTransaction({from:from, to:to, value:value, gas:gas}).then(e=>{res = e});
+    require('deasync').loopWhile(function() {return res == undefined});
+
+    return res;
+  },
 };
