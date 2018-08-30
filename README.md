@@ -1,4 +1,4 @@
-# PwnETH v.0.1 - Solidity Exploit Helper
+# PwnETH v.0.2.0 - Solidity Exploit Helper
 PwnETH => solidity exploit helper v.0.1
 
 ## What is PwnETH
