@@ -1,5 +1,5 @@
 # PwnETH v.0.2.0 - Solidity Exploit Helper
-PwnETH => solidity exploit helper v.0.1
+PwnETH => solidity exploit helper v.0.2.0
 
 ## What is PwnETH
 PwnETH is a convenient library for analyzing and exploiting solidity contracts on Ethereum.
