@@ -99,4 +99,23 @@ module.exports = {
 
     return res;
   },
+
+  compileContract(filename, contractName, debug=false) {
+    var filedata = require('fs').readFileSync(filename);
+    var compiled = require('solc').compile(filedata.toString(), 1);
+
+    if(compiled.errors && debug) {
+      for(var i = 0; i < compiled.errors.length; i++) {
+        console.log(compiled.errors[i]);
+      }
+
+      return false;
+    }
+
+    if(contractName) {
+      return compiled.contracts[contractName];
+    } else {
+      return compiled;
+    }
+  },
 };
