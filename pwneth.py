@@ -79,50 +79,44 @@ def getblock(web3):
 	return block
 
 ############################### transtion ##################################
-def deploy_contract(web3, contract_interface):
-	tx_hash = web3.eth.contract(abi=contract_interface['abi'], bytecode=contract_interface['bin']).deploy()
-	address = web3.eth.getTransactionReceipt(tx_hash['contractAddress'])
-	
-	return address
-
-def de(web3, filename):
-	compiled_sol = compile_source_file(filename)
-
-	contract_id, contract_interface = compiled_sol.popitem()
-	address = deploy_contract(web3, contract_interface)
-
-	print("contract_id, address")
-
-def deploy(web3, filename, contractname, address):
+def createcontract(web3, filename, contractname, privateKey):
 	compiled_sol = compile_source(open(filename).read())
 	contract_interface = compiled_sol['<stdin>:'+contractname]
 
-	web3.eth.defaultAccount = address
-	Contract = web3.eth.contract(abi=contract_interface['abi'], bytecode=contract_interface['bin'])	
+	contract_ = web3.eth.contract(abi=contract_interface['abi'],bytecode=contract_interface['bin'])
 
-	tx_hash = Contract.constructor().transact()	
-	tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+	acct = web3.eth.account.privateKeyToAccount(privateKey)
 
-	contract = web3.eth.contract(address=tx_receipt.contractAddress, abi=contract_interface['abi'],)	
+	construct_txn = contract_.constructor().buildTransaction({
+		'from': acct.address,
+		'nonce': web3.eth.getTransactionCount(acct.address),
+		'gas': 1728712,
+		'gasPrice': web3.toWei('21', 'gwei')})
 
-def compile(web3, address, password, filename, contractname):
-	web3.personal.unlockAccount(web3.toChecksumAddress(address), password, 0)
-	compiled = compile_source(open(filename).read())
-	interface = compiled['<stdin>:'+contractname]
-	contract = web3.eth.contract(abi=interface['abi'],
-				   bytecode=interface['bin'],
-				   bytecode_runtime=interface['bin-runtime'])
-	tx_hash = contract.deploy(transaction={'from': web3.toChecksumAddress(address)})
-	web3.miner.start(2)
+	signed = acct.signTransaction(construct_txn)
 
-def sendtx(web3, _gas, _to, _value, _data, private_key):
-	signed_txn = web3.eth.account.signTransaction(dict(
-    	nonce=web3.eth.getTransactionCount(web3.eth.coinbase),
-	gasPrice=web3.eth.gasPrice,
-	gas=_gas,
-	to=_to,
-	value=_value,
-	data=_data,),
-	private_key,)
+	print(web3.eth.sendRawTransaction(signed.rawTransaction).hex())
+	print("nice transaction")
 
-	return web3.eth.sendRawTransaction(signed_txn.rawTransaction)
+	return contract_
+
+def callfunction(web3, filename, contractname, privateKey, _to, callfunc, argv):
+	compiled_sol = compile_source(open(filename).read())
+	contract_interface = compiled_sol['<stdin>:'+contractname]
+
+	contract_ = web3.eth.contract(abi=contract_interface['abi'],bytecode=contract_interface['bin'])
+
+	acct = web3.eth.account.privateKeyToAccount(privateKey)
+	fun = contract_.functions[callfunc]
+	tx = fun(argv).buildTransaction({
+    	'from': acct.address,
+    	'to': _to,
+    	'nonce': web3.eth.getTransactionCount(acct.address),
+   	'gas': 1728712,
+    	'gasPrice': web3.toWei('21', 'gwei')})
+
+	signed = acct.signTransaction(tx)
+
+	print(web3.eth.sendRawTransaction(signed.rawTransaction).hex())
+	print("nice transaction")
+	
