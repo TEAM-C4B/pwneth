@@ -30,5 +30,6 @@ If you have any questions not worthy of a bug report, feel free to mail us at te
 
 ## LICENSE
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
 Copyright (c) 2018 Code4Block
