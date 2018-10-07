@@ -1,6 +1,8 @@
 # PwnETH v.0.2.0 - Solidity Exploit Helper
-PwnETH => solidity exploit helper v.0.2.0
-
+PwnETH => solidity exploit helper v.0.2.0    
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/TEAM-C4B/pwneth.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/TEAM-C4B/pwneth/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/TEAM-C4B/pwneth.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/TEAM-C4B/pwneth/context:python)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/TEAM-C4B/pwneth.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/TEAM-C4B/pwneth/context:javascript)
 ## What is PwnETH
 PwnETH is a convenient library for analyzing and exploiting solidity contracts on Ethereum.
 
