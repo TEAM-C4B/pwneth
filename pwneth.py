@@ -1,13 +1,9 @@
-from web3 import Web3           #pip3 install web3
-from solc import compile_source #pip3 install py-solc
-
-def HBconvert(data):
-	result = str(hex(data[0]))
-
-	for i in range(1,len(data)):
-		result += str(hex(data[i])[2:])
-
-	return result
+from web3 import Web3, HTTPProvider
+from solc import compile_source
+from eth_account import Account
+import bs4
+import json
+import requests
 
 ################## convert data #########################
 
@@ -43,43 +39,41 @@ def fromWei(target):
 
 ###################### connect server ###############################
 
+def mainnet(key):
+	return Web3(Web3.HTTPProvider("https://mainnet.infura.io/" + key))
 
-def mainnet():
-	return Web3(Web3.HTTPProvider("https://mainnet.infura.io"))
+def ropsten(key):
+	return Web3(Web3.HTTPProvider("https://ropsten.infura.io/" + key))
 
-def ropsten():
-	return Web3(Web3.HTTPProvider("https://ropsten.infura.io"))
+def kovan(key):
+	return Web3(Web3.HTTPProvider("https://kovan.infura.io/" + key))
 
-def kovan():
-	return Web3(Web3.HTTPProvider("https://kovan.infura.io"))
+def rinkeby(key):
+	return Web3(Web3.HTTPProvider("https://rinkeby.infura.io/" + key))
 
-def rinkeby():
-	return Web3(Web3.HTTPProvider("https://rinkeby.infura.io"))
-
-def local(port):
-	return Web3(HTTPProvider('http://localhost:'+str(port)))
+def local(ip, port):
+	return Web3(HTTPProvider("http://" + ip + ':' + str(port)))
 
 ############################# get info #####################################
 
 def getStorageAt(web3, addr, idx):
 	checkaddr = web3.toChecksumAddress(addr)
-	temp = web3.eth.getStorageAt(checkaddr, idx)
+	data = web3.eth.getStorageAt(checkaddr, idx)
 
-	return HBconvert(temp)
+	return toHex(data)
 
 def getbytecode(web3, addr):
-	temp = web3.eth.getCode(addr)
-	result = str(hex(temp[0]))
+	data = web3.eth.getCode(addr)
 
-	return HBconvert(temp)
+	return toHex(data)
 
 def getblock(web3):
 	block = web3.eth.getBlock('latest')
 
 	return block
 
-############################### transtion ##################################
-def createcontract(web3, filename, contractname, privateKey):
+############################### transaction ##################################
+def create_contract(web3, filename, contractname, privateKey):
 	compiled_sol = compile_source(open(filename).read())
 	contract_interface = compiled_sol['<stdin>:'+contractname]
 
@@ -88,21 +82,19 @@ def createcontract(web3, filename, contractname, privateKey):
 	acct = web3.eth.account.privateKeyToAccount(privateKey)
 
 	construct_txn = contract_.constructor().buildTransaction({
-		'from': acct.address,
-		'nonce': web3.eth.getTransactionCount(acct.address),
-		'gas': 1728712,
-		'gasPrice': web3.toWei('21', 'gwei')})
+	'from': acct.address,
+	'nonce': web3.eth.getTransactionCount(acct.address)})
 
 	signed = acct.signTransaction(construct_txn)
 
-	print(web3.eth.sendRawTransaction(signed.rawTransaction).hex())
-	print("nice transaction")
+	print("Tx Hash : " + web3.eth.sendRawTransaction(signed.rawTransaction).hex())
 
 	return contract_
 
-def callfunction(web3, filename, contractname, privateKey, _to, callfunc, argv):
-	compiled_sol = compile_source(open(filename).read())
-	contract_interface = compiled_sol['<stdin>:'+contractname]
+def call_function(web3, privateKey, _to, callfunc, argv):
+	name, code = parse_code(web3, _to)
+	compiled_sol = compile_source(toText(code))
+	contract_interface = compiled_sol['<stdin>:' + toText(name)]
 
 	contract_ = web3.eth.contract(abi=contract_interface['abi'],bytecode=contract_interface['bin'])
 
@@ -111,12 +103,28 @@ def callfunction(web3, filename, contractname, privateKey, _to, callfunc, argv):
 	tx = fun(argv).buildTransaction({
     	'from': acct.address,
     	'to': _to,
-    	'nonce': web3.eth.getTransactionCount(acct.address),
-   	'gas': 1728712,
-    	'gasPrice': web3.toWei('21', 'gwei')})
+    	'nonce': web3.eth.getTransactionCount(acct.address)})
 
 	signed = acct.signTransaction(tx)
 
-	print(web3.eth.sendRawTransaction(signed.rawTransaction).hex())
-	print("nice transaction")
-	
+	print("Tx Hash : " + web3.eth.sendRawTransaction(signed.rawTransaction).hex())
+
+####################################  parse code #####################################3
+def parse_code(web3, address):
+	if(web3.net.version == '1'):
+		api_url = 'https://api.etherscan.io/api?module=contract&action=getsourcecode&address=' + address
+	elif(web3.net.version == '3'):
+		api_url = 'https://api-ropsten.etherscan.io/api?module=contract&action=getsourcecode&address=' + address
+	elif(web3.net.version == '42'):
+		api_url = 'https://api-kovan.etherscan.io/api?module=contract&action=getsourcecode&address=' + address
+	elif(web3.net.version == '4'):
+		api_url = 'https://api-rinkeby.etherscan.io/api?module=contract&action=getsourcecode&address=' + address
+
+	r = requests.get(api_url)
+	data = r.text.encode('utf-8')
+
+	info = json.loads(data)['result']
+	name = info[0]['ContractName'].encode('utf-8')
+	code = info[0]['SourceCode'].encode('utf-8')
+
+	return name, code
