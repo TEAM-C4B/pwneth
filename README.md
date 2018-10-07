@@ -23,7 +23,7 @@ export NODE_PATH=/where/the/pwneth.js/
 ```
 
 ## Contribution
-Team Code4Block: yeonnic, rictr0y, han3l
+Team Code4Block: yeonnic, rictr0y, han3l, Tello
 
 ## Contact
 If you have any questions not worthy of a bug report, feel free to mail us at team.code4block@gmail.com and ask away.
