@@ -69,7 +69,7 @@ def create_contract(web3, file_name, contract_name, private_key):
     return contract
 
 
-def call_function(web3, private_key, to, call_func, *argv):
+def call_function(web3, private_key, to, value, call_func, *argv):
     name, code = parse_code(web3, to)
     compiled_sol = compile_source(Web3.toText(code))
     contract_interface = compiled_sol["<stdin>:" + Web3.toText(name)]
@@ -81,6 +81,7 @@ def call_function(web3, private_key, to, call_func, *argv):
     tx = fun(*argv).buildTransaction({
 	    "from": acct.address,
 	    "to": to,
+	    "value": value,
 	    "nonce": web3.eth.getTransactionCount(acct.address)
     })
 
