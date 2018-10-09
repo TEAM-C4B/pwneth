@@ -1,10 +1,8 @@
-import bs4
 import json
 import requests
 
 from web3 import Web3, HTTPProvider
 from solc import compile_source
-from eth_account import Account
 
 ###################### connect server ###############################
 
